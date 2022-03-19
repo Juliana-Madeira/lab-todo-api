@@ -1,8 +1,16 @@
 const { Router } = require('express');
-const Todo = require('../models/Todo');
+const Todo = require('../models/Todo.js');
 
 const router = Router();     //trazer do express
 
+router.get('/', async (req, res) => {
+  try {
+      const allTodos = await Todo.find();
+      res.status(200).json(allTodos);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
 
 router.post('/', async (req, res) => {
     try {
@@ -14,14 +22,7 @@ router.post('/', async (req, res) => {
   });
 
 
-router.get('/', async (req, res) => {
-    try {
-        const allTodos = await Todo.find();
-        res.status(200).json(allTodos);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+
 
   
 router.put('/:id', async (req, res) => {
