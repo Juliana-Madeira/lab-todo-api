@@ -9,12 +9,12 @@ router.post('/signup', async (req, res) => {
     try {
         const { name, email, password } = req.body 
         if(!name || !email || !password){
-            throw new Error ('all fields are required')
+            throw new Error ('All fields are required')
         }
 
         const user = await User.findOne({email})
         if (user){
-            throw new Error ('email already exists')
+            throw new Error ('Email already exists')
         }
 
         const salt = bcrypt.genSaltSync(12)
@@ -26,10 +26,17 @@ router.post('/signup', async (req, res) => {
             passwordHash: hash
         })
 
-        res.status(201).json({user: newUser.name, email: newUser.email})
+        res.status(201).json({
+            user: newUser.name, 
+            email: newUser.email,
+            todos: newUser.todos
+        })
     } 
     catch (error) { 
-        res.status(400).json({msg: error.message})
+        if(error.message === 'User alredy exists'){
+            res.status(400).json({ msg: error.message })
+        }
+        res.status(500).json({ msg: error.message })
         
     }
 })
@@ -40,25 +47,26 @@ router.post('/login', async (req, res) => {
         const { email, password } = req.body;
         const userFromDb = await User.findOne({email});
         if(!userFromDb){
-            throw new Error ('invalid')
+            throw new Error ('User not found')
         } 
 
         const verifiedHash = bcrypt.compareSync(password, userFromDb.passwordHash)
         if (!verifiedHash){
-            throw new Error ('invalid username or password')
+            throw new Error ('Email or password invalid')
         }
 
         const payload = {
             id: userFromDb._id,
             name: userFromDb.name,
-            email}
+            email
+        }
 
         const token = jwt.sign(payload, process.env.JWT_SECRET, {expiresIn:'10d'})
 
         res.status(200).json({user: payload, token})
 
     } catch (error) {
-        res.status(500).json(error.message)
+        res.status(500).json({msg: error.message})
     }
 })
 
