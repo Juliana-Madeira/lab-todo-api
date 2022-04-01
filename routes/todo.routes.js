@@ -55,7 +55,7 @@ router.delete('/:id', async (req, res) => {
         throw new Error ('cannot delete another user\'s todo')
       }
       todo.delete()
-      res.status(204).json();    //json vazio porque deletamos apenas
+      res.status(204).json('successfully deleted');    //json vazio porque deletamos apenas
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
